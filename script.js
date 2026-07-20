@@ -1,159 +1,184 @@
-'use strict';
+// ====================
+// Smooth Scrolling Navigation
+// ====================
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
 
+// ====================
+// Intersection Observer for Scroll Animations
+// ====================
+const observerOptions = {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.15
+};
 
+const fadeInObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            // Keep observing in case user scrolls back up
+        }
+    });
+}, observerOptions);
 
-// element toggle function
-const elementToggleFunc = function (elem) { elem.classList.toggle("active"); }
+// Observe sections for fade-in animations
+document.querySelectorAll('.about, .experience, .education, .contact').forEach(section => {
+    section.classList.add('fade-in');
+    fadeInObserver.observe(section);
+});
 
+// ====================
+// Navbar Scroll Effect
+// ====================
+let lastScroll = 0;
+const navbar = document.querySelector('.navbar');
 
+window.addEventListener('scroll', () => {
+    const currentScroll = window.pageYOffset;
 
-// sidebar variables
-const sidebar = document.querySelector("[data-sidebar]");
-const sidebarBtn = document.querySelector("[data-sidebar-btn]");
-
-// sidebar toggle functionality for mobile
-sidebarBtn.addEventListener("click", function () { elementToggleFunc(sidebar); });
-
-
-
-// testimonials variables
-const testimonialsItem = document.querySelectorAll("[data-testimonials-item]");
-const modalContainer = document.querySelector("[data-modal-container]");
-const modalCloseBtn = document.querySelector("[data-modal-close-btn]");
-const overlay = document.querySelector("[data-overlay]");
-
-// modal variable
-const modalImg = document.querySelector("[data-modal-img]");
-const modalTitle = document.querySelector("[data-modal-title]");
-const modalText = document.querySelector("[data-modal-text]");
-
-// modal toggle function
-const testimonialsModalFunc = function () {
-  modalContainer.classList.toggle("active");
-  overlay.classList.toggle("active");
-}
-
-// add click event to all modal items
-for (let i = 0; i < testimonialsItem.length; i++) {
-
-  testimonialsItem[i].addEventListener("click", function () {
-
-    modalImg.src = this.querySelector("[data-testimonials-avatar]").src;
-    modalImg.alt = this.querySelector("[data-testimonials-avatar]").alt;
-    modalTitle.innerHTML = this.querySelector("[data-testimonials-title]").innerHTML;
-    modalText.innerHTML = this.querySelector("[data-testimonials-text]").innerHTML;
-
-    testimonialsModalFunc();
-
-  });
-
-}
-
-// add click event to modal close button
-modalCloseBtn.addEventListener("click", testimonialsModalFunc);
-overlay.addEventListener("click", testimonialsModalFunc);
-
-
-
-// custom select variables
-const select = document.querySelector("[data-select]");
-const selectItems = document.querySelectorAll("[data-select-item]");
-const selectValue = document.querySelector("[data-selecct-value]");
-const filterBtn = document.querySelectorAll("[data-filter-btn]");
-
-select.addEventListener("click", function () { elementToggleFunc(this); });
-
-// add event in all select items
-for (let i = 0; i < selectItems.length; i++) {
-  selectItems[i].addEventListener("click", function () {
-
-    let selectedValue = this.innerText.toLowerCase();
-    selectValue.innerText = this.innerText;
-    elementToggleFunc(select);
-    filterFunc(selectedValue);
-
-  });
-}
-
-// filter variables
-const filterItems = document.querySelectorAll("[data-filter-item]");
-
-const filterFunc = function (selectedValue) {
-
-  for (let i = 0; i < filterItems.length; i++) {
-
-    if (selectedValue === "all") {
-      filterItems[i].classList.add("active");
-    } else if (selectedValue === filterItems[i].dataset.category) {
-      filterItems[i].classList.add("active");
+    // Add shadow when scrolled
+    if (currentScroll > 50) {
+        navbar.style.boxShadow = '0 4px 12px rgba(127, 205, 145, 0.15)';
     } else {
-      filterItems[i].classList.remove("active");
+        navbar.style.boxShadow = 'none';
     }
 
-  }
+    lastScroll = currentScroll;
+});
 
+// ====================
+// Floating Stickers Interaction
+// ====================
+document.querySelectorAll('.sticker').forEach(sticker => {
+    sticker.addEventListener('mouseenter', () => {
+        sticker.style.transition = 'transform 0.3s ease';
+        sticker.style.transform = 'scale(1.3) rotate(15deg)';
+        sticker.style.opacity = '1';
+    });
+
+    sticker.addEventListener('mouseleave', () => {
+        sticker.style.transform = 'scale(1) rotate(0deg)';
+        sticker.style.opacity = '0.6';
+    });
+});
+
+// ====================
+// Active Navigation Link
+// ====================
+const sections = document.querySelectorAll('section[id]');
+
+function highlightNavigation() {
+    const scrollPosition = window.pageYOffset + 100;
+
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.offsetHeight;
+        const sectionId = section.getAttribute('id');
+
+        if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${sectionId}`) {
+                    link.classList.add('active');
+                }
+            });
+        }
+    });
 }
 
-// add event in all filter button items for large screen
-let lastClickedBtn = filterBtn[0];
+window.addEventListener('scroll', highlightNavigation);
+window.addEventListener('load', highlightNavigation);
 
-for (let i = 0; i < filterBtn.length; i++) {
+// ====================
+// Typing Animation for Hero Badge (Optional Enhancement)
+// ====================
+const heroBadge = document.querySelector('.hero-badge');
+if (heroBadge) {
+    const originalText = heroBadge.textContent;
+    heroBadge.textContent = '';
+    let charIndex = 0;
 
-  filterBtn[i].addEventListener("click", function () {
-
-    let selectedValue = this.innerText.toLowerCase();
-    selectValue.innerText = this.innerText;
-    filterFunc(selectedValue);
-
-    lastClickedBtn.classList.remove("active");
-    this.classList.add("active");
-    lastClickedBtn = this;
-
-  });
-
-}
-
-
-
-// contact form variables
-const form = document.querySelector("[data-form]");
-const formInputs = document.querySelectorAll("[data-form-input]");
-const formBtn = document.querySelector("[data-form-btn]");
-
-// add event to all form input field
-for (let i = 0; i < formInputs.length; i++) {
-  formInputs[i].addEventListener("input", function () {
-
-    // check form validation
-    if (form.checkValidity()) {
-      formBtn.removeAttribute("disabled");
-    } else {
-      formBtn.setAttribute("disabled", "");
+    function typeText() {
+        if (charIndex < originalText.length) {
+            heroBadge.textContent += originalText.charAt(charIndex);
+            charIndex++;
+            setTimeout(typeText, 50);
+        }
     }
 
-  });
+    // Start typing animation after page load
+    setTimeout(typeText, 500);
 }
 
+// ====================
+// Timeline Items Animation on Scroll
+// ====================
+const timelineObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateX(0)';
+        }
+    });
+}, {
+    threshold: 0.1,
+    rootMargin: '0px'
+});
 
+document.querySelectorAll('.timeline-item').forEach(item => {
+    timelineObserver.observe(item);
+});
 
-// page navigation variables
-const navigationLinks = document.querySelectorAll("[data-nav-link]");
-const pages = document.querySelectorAll("[data-page]");
+// ====================
+// Button Ripple Effect
+// ====================
+document.querySelectorAll('.btn').forEach(button => {
+    button.addEventListener('click', function(e) {
+        const ripple = document.createElement('span');
+        const rect = this.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
 
-// add event to all nav link
-for (let i = 0; i < navigationLinks.length; i++) {
-  navigationLinks[i].addEventListener("click", function () {
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = x + 'px';
+        ripple.style.top = y + 'px';
+        ripple.classList.add('ripple');
 
-    for (let i = 0; i < pages.length; i++) {
-      if (this.innerHTML.toLowerCase() === pages[i].dataset.page) {
-        pages[i].classList.add("active");
-        navigationLinks[i].classList.add("active");
-        window.scrollTo(0, 0);
-      } else {
-        pages[i].classList.remove("active");
-        navigationLinks[i].classList.remove("active");
-      }
+        this.appendChild(ripple);
+
+        setTimeout(() => {
+            ripple.remove();
+        }, 600);
+    });
+});
+
+// ====================
+// Parallax Effect for Hero Visual
+// ====================
+const heroVisual = document.querySelector('.hero-visual');
+
+window.addEventListener('scroll', () => {
+    if (heroVisual && window.pageYOffset < window.innerHeight) {
+        const scrolled = window.pageYOffset;
+        heroVisual.style.transform = `translateY(${scrolled * 0.3}px)`;
     }
+});
 
-  });
-}
+// ====================
+// Console Easter Egg
+// ====================
+console.log('%c👋 Hey there!', 'font-size: 20px; color: #7FCD91; font-weight: bold;');
+console.log('%cThanks for checking out my portfolio!', 'font-size: 14px; color: #5A6F6B;');
+console.log('%cFeel free to reach out: anggaprawira5.0@outlook.com', 'font-size: 12px; color: #7D9490;');
