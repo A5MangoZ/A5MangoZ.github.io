@@ -77,7 +77,7 @@ export async function fetchMonkeytypeTelemetry(forceRefresh: boolean = false): P
         if (parsed.timestamp && Date.now() - parsed.timestamp < CACHE_TTL_MS && parsed.data) {
           return {
             ...parsed.data,
-            isLive: true,
+            isLive: false,
             lastUpdated: new Date(parsed.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           };
         }
@@ -117,77 +117,28 @@ export async function fetchMonkeytypeTelemetry(forceRefresh: boolean = false): P
     const streakDays = streakData?.length ?? FALLBACK_MONKEYTYPE.streakDays;
     const maxStreakDays = streakData?.maxLength ?? FALLBACK_MONKEYTYPE.maxStreakDays;
 
-    // Parse Personal Bests
+    // Parse Personal Bests using configuration array
     const pbs: MonkeytypePersonalBest[] = [];
+    const pbConfigs = [
+      { mode: "words-10", label: "10 Words", source: pbWordsData["10"]?.[0] },
+      { mode: "time-30", label: "30 Seconds", source: pbTimeData["30"]?.[0] },
+      { mode: "words-25", label: "25 Words", source: pbWordsData["25"]?.[0] },
+      { mode: "time-60", label: "60 Seconds", source: pbTimeData["60"]?.[0] },
+      { mode: "time-15", label: "15 Seconds", source: pbTimeData["15"]?.[0] },
+    ];
 
-    // Words 10
-    const w10 = pbWordsData["10"]?.[0];
-    if (w10) {
-      pbs.push({
-        mode: "words-10",
-        label: "10 Words",
-        wpm: Number(w10.wpm.toFixed(1)),
-        acc: Number(w10.acc.toFixed(1)),
-        raw: Number(w10.raw.toFixed(1)),
-        consistency: w10.consistency ? Number(w10.consistency.toFixed(1)) : undefined,
-        language: w10.language,
-      });
-    }
-
-    // Time 30
-    const t30 = pbTimeData["30"]?.[0];
-    if (t30) {
-      pbs.push({
-        mode: "time-30",
-        label: "30 Seconds",
-        wpm: Number(t30.wpm.toFixed(1)),
-        acc: Number(t30.acc.toFixed(1)),
-        raw: Number(t30.raw.toFixed(1)),
-        consistency: t30.consistency ? Number(t30.consistency.toFixed(1)) : undefined,
-        language: t30.language,
-      });
-    }
-
-    // Words 25
-    const w25 = pbWordsData["25"]?.[0];
-    if (w25) {
-      pbs.push({
-        mode: "words-25",
-        label: "25 Words",
-        wpm: Number(w25.wpm.toFixed(1)),
-        acc: Number(w25.acc.toFixed(1)),
-        raw: Number(w25.raw.toFixed(1)),
-        consistency: w25.consistency ? Number(w25.consistency.toFixed(1)) : undefined,
-        language: w25.language,
-      });
-    }
-
-    // Time 60
-    const t60 = pbTimeData["60"]?.[0];
-    if (t60) {
-      pbs.push({
-        mode: "time-60",
-        label: "60 Seconds",
-        wpm: Number(t60.wpm.toFixed(1)),
-        acc: Number(t60.acc.toFixed(1)),
-        raw: Number(t60.raw.toFixed(1)),
-        consistency: t60.consistency ? Number(t60.consistency.toFixed(1)) : undefined,
-        language: t60.language,
-      });
-    }
-
-    // Time 15
-    const t15 = pbTimeData["15"]?.[0];
-    if (t15) {
-      pbs.push({
-        mode: "time-15",
-        label: "15 Seconds",
-        wpm: Number(t15.wpm.toFixed(1)),
-        acc: Number(t15.acc.toFixed(1)),
-        raw: Number(t15.raw.toFixed(1)),
-        consistency: t15.consistency ? Number(t15.consistency.toFixed(1)) : undefined,
-        language: t15.language,
-      });
+    for (const cfg of pbConfigs) {
+      if (cfg.source) {
+        pbs.push({
+          mode: cfg.mode,
+          label: cfg.label,
+          wpm: Number(cfg.source.wpm.toFixed(1)),
+          acc: Number(cfg.source.acc.toFixed(1)),
+          raw: Number(cfg.source.raw.toFixed(1)),
+          consistency: cfg.source.consistency ? Number(cfg.source.consistency.toFixed(1)) : undefined,
+          language: cfg.source.language,
+        });
+      }
     }
 
     // If pbs is empty, use fallback
@@ -209,7 +160,7 @@ export async function fetchMonkeytypeTelemetry(forceRefresh: boolean = false): P
       timeTyping,
       streakDays,
       maxStreakDays,
-      xp: 210264,
+      xp: typeof statsData?.xp === "number" ? statsData.xp : FALLBACK_MONKEYTYPE.xp,
       personalBests: finalPbs,
       isLive: true,
       lastUpdated: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),

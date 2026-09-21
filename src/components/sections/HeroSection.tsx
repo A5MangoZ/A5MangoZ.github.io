@@ -50,7 +50,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenResume }) => {
                   {PERSONAL_INFO.name}
                 </span>
               </h1>
-              <p className="font-mono text-sm sm:text-base text-[var(--primary-dark)] dark:text-[var(--primary-light)] font-semibold">
+              <p className="font-mono text-sm sm:text-base text-[var(--primary)] font-semibold">
                 {PERSONAL_INFO.role}
               </p>
             </div>

@@ -15,13 +15,13 @@ export const DashboardSection: React.FC = () => {
       case 0:
         return "bg-[var(--border)] opacity-40";
       case 1:
-        return "bg-emerald-900/60 dark:bg-emerald-950";
+        return "bg-[var(--primary)] opacity-40";
       case 2:
-        return "bg-emerald-700/80 dark:bg-emerald-800";
+        return "bg-[var(--primary)] opacity-70";
       case 3:
-        return "bg-emerald-500";
+        return "bg-[var(--primary)] opacity-90";
       case 4:
-        return "bg-emerald-400 font-bold";
+        return "bg-[var(--primary)] opacity-100 shadow-[0_0_8px_var(--primary)]";
     }
   };
 

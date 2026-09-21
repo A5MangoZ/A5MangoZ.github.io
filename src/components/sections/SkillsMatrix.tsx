@@ -155,9 +155,9 @@ export const SkillsMatrix: React.FC = () => {
                 <span
                   className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
                     skill.level === "Specialist"
-                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-bold"
+                      ? "bg-[var(--primary)]/10 border-[var(--primary)]/30 text-[var(--primary)] font-bold"
                       : skill.level === "Advanced"
-                      ? "bg-teal-500/10 border-teal-500/30 text-teal-600 dark:text-teal-400 font-semibold"
+                      ? "bg-[var(--primary)]/5 border-[var(--primary)]/20 text-[var(--primary)] font-semibold"
                       : "bg-[var(--bg-secondary)] border-[var(--border)] text-[var(--text-muted)]"
                   }`}
                 >

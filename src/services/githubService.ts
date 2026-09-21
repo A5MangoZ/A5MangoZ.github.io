@@ -163,7 +163,7 @@ export async function fetchGithubTelemetry(forceRefresh: boolean = false): Promi
         if (parsed.timestamp && Date.now() - parsed.timestamp < CACHE_TTL_MS && parsed.data) {
           return {
             ...parsed.data,
-            isLive: true,
+            isLive: false,
             lastUpdated: new Date(parsed.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           };
         }
@@ -195,23 +195,39 @@ export async function fetchGithubTelemetry(forceRefresh: boolean = false): Promi
     // Calculate streak
     const activeStreakDays = calculateStreak(rawContributions);
 
-    // Group into 52 weeks (last 364 days)
-    // Keep the most recent 364 days (52 weeks * 7) so it aligns cleanly to the 7-row grid
-    const recentDays = rawContributions.slice(-364);
+    // Group contributions by authentic calendar week (Sunday to Saturday)
     const weeks: GithubWeek[] = [];
+    let currentWeekDays: GithubDay[] = [];
 
-    for (let i = 0; i < recentDays.length; i += 7) {
-      const chunk = recentDays.slice(i, i + 7);
-      weeks.push({
-        weekNumber: weeks.length + 1,
-        days: chunk.map((c: any, dIdx: number) => ({
-          dayOfWeek: dIdx,
-          date: c.date,
-          count: c.count,
-          level: (c.level as 0 | 1 | 2 | 3 | 4) ?? 0,
-        })),
+    for (const c of rawContributions) {
+      const dateObj = new Date(c.date + "T00:00:00");
+      const dayOfWeek = dateObj.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+
+      if (dayOfWeek === 0 && currentWeekDays.length > 0) {
+        weeks.push({
+          weekNumber: weeks.length + 1,
+          days: currentWeekDays,
+        });
+        currentWeekDays = [];
+      }
+
+      currentWeekDays.push({
+        dayOfWeek,
+        date: c.date,
+        count: c.count,
+        level: (c.level as 0 | 1 | 2 | 3 | 4) ?? 0,
       });
     }
+
+    if (currentWeekDays.length > 0) {
+      weeks.push({
+        weekNumber: weeks.length + 1,
+        days: currentWeekDays,
+      });
+    }
+
+    // Keep the most recent 52 weeks and re-index cleanly
+    const recentWeeks = weeks.slice(-52).map((w, idx) => ({ ...w, weekNumber: idx + 1 }));
 
     // Parse repositories
     let pinnedRepos: GithubRepo[] = REAL_REPOS;
@@ -236,7 +252,7 @@ export async function fetchGithubTelemetry(forceRefresh: boolean = false): Promi
       activeStreakDays: activeStreakDays > 0 ? activeStreakDays : 1,
       repositoriesCount,
       pinnedRepos,
-      weeks: weeks.length > 0 ? weeks : FALLBACK_GITHUB.weeks,
+      weeks: recentWeeks.length > 0 ? recentWeeks : FALLBACK_GITHUB.weeks,
       isLive: true,
       lastUpdated: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };

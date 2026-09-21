@@ -18,7 +18,16 @@ export const ContactSection: React.FC = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate sending
+    // Compose mailto URI
+    const mailtoSubject = encodeURIComponent(formData.subject || `Inquiry from ${formData.name}`);
+    const mailtoBody = encodeURIComponent(
+      `Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
+    );
+    const mailtoUrl = `mailto:${PERSONAL_INFO.email}?subject=${mailtoSubject}&body=${mailtoBody}`;
+
+    // Attempt to open default email client
+    window.location.href = mailtoUrl;
+
     setTimeout(() => {
       setIsSubmitting(false);
       setIsSubmitted(true);
@@ -131,9 +140,15 @@ export const ContactSection: React.FC = () => {
                 Message Sent Successfully!
               </h3>
               <p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
-                Thank you for reaching out, <span className="font-semibold text-[var(--primary)]">{formData.name}</span>! I will review your message and reply via <span className="font-mono text-xs">{formData.email}</span> shortly.
+                Thank you for reaching out, <span className="font-semibold text-[var(--primary)]">{formData.name}</span>! Your email client should open automatically with your inquiry pre-filled.
               </p>
-              <div className="pt-2">
+              <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+                <a
+                  href={`mailto:${PERSONAL_INFO.email}?subject=${encodeURIComponent(formData.subject || `Inquiry from ${formData.name}`)}&body=${encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`)}`}
+                  className="px-5 py-2.5 rounded-xl bg-[var(--primary)] text-white text-xs font-semibold hover:opacity-90 transition-all shadow-sm"
+                >
+                  Open Email Client
+                </a>
                 <button
                   onClick={handleReset}
                   className="px-5 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] hover:border-[var(--border-highlight)] text-xs font-semibold text-[var(--text-primary)] transition-all hover:scale-105"

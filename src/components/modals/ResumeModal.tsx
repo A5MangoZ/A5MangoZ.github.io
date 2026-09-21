@@ -58,15 +58,43 @@ ${EDUCATION_DATA.map(
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-150">
-      
-      {/* Backdrop */}
-      <div className="fixed inset-0" onClick={onClose} />
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden !important;
+          }
+          #printable-resume, #printable-resume * {
+            visibility: visible !important;
+          }
+          #printable-resume {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 32px !important;
+            background: #ffffff !important;
+            color: #111827 !important;
+            box-shadow: none !important;
+            border: none !important;
+            max-height: none !important;
+            overflow: visible !important;
+            border-radius: 0 !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+        }
+      `}</style>
 
-      {/* Modal */}
-      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] shadow-2xl z-10 flex flex-col animate-in zoom-in-95 duration-150">
-        
-        {/* Header */}
-        <div className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 border-b border-[var(--border)] bg-[var(--bg-card)]/90 backdrop-blur-md">
+      {/* Backdrop */}
+      <div className="fixed inset-0 no-print" onClick={onClose} />
+
+      {/* Modal / Printable Container */}
+      <div id="printable-resume" className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl border border-[var(--border)] bg-[var(--bg-card)] shadow-2xl z-10 flex flex-col animate-in zoom-in-95 duration-150">
+
+        {/* Header (hidden in print) */}
+        <div className="sticky top-0 z-20 flex items-center justify-between px-6 py-4 border-b border-[var(--border)] bg-[var(--bg-card)]/90 backdrop-blur-md no-print">
           <div className="flex items-center gap-2 font-mono text-sm font-bold text-[var(--text-primary)]">
             <span className="w-2.5 h-2.5 rounded-full bg-[var(--primary)]"></span>
             <span>{PERSONAL_INFO.name} - Curriculum Vitae</span>
